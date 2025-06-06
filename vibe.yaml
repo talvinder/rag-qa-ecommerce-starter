@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: rag-qa-ecommerce-starter API
+  description: >-
+    E-commerce RAG Q&A System (Starter - Workshop Edition) using LlamaIndex for
+    retrieval augmented generation with product data
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Development server
+paths: {}
+components:
+  schemas: {}
+  responses:
+    NotFound:
+      description: The requested resource was not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Resource not found
+              status:
+                type: integer
+                example: 404
+    BadRequest:
+      description: The request was invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Invalid request
+              status:
+                type: integer
+                example: 400
+              details:
+                type: object
+                additionalProperties: true

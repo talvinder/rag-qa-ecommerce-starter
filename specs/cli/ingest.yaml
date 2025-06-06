@@ -1,0 +1,296 @@
+type: cli
+identifier: ingest
+summary: Data ingestion script that loads product data from CSV file and builds a vector index using LlamaIndex
+specification:
+  interface:
+    command:
+      name: ingest
+      description: Data ingestion script that loads product data from CSV file and builds a vector index using LlamaIndex
+      usage: ingest [options] <input>
+      examples:
+        - command: ingest --help
+          description: Show help information
+        - command: ingest --version
+          description: Show version information
+      aliases:
+        - ing
+    global_options:
+      - name: help
+        short: h
+        long: '--help'
+        description: Show help information
+        type: boolean
+        frameworkTypes:
+          node: boolean
+          python: store_true
+          go: bool
+          rust: bool
+          bash: flag
+      - name: version
+        short: V
+        long: '--version'
+        description: Show version information
+        type: boolean
+        frameworkTypes:
+          node: boolean
+          python: store_true
+          go: bool
+          rust: bool
+          bash: flag
+      - name: verbose
+        short: v
+        long: '--verbose'
+        description: Enable verbose output
+        type: boolean
+        frameworkTypes:
+          node: boolean
+          python: store_true
+          go: bool
+          rust: bool
+          bash: flag
+      - name: quiet
+        short: q
+        long: '--quiet'
+        description: Suppress output
+        type: boolean
+        conflicts_with:
+          - verbose
+        frameworkTypes:
+          node: boolean
+          python: store_true
+          go: bool
+          rust: bool
+          bash: flag
+    arguments:
+      - name: input
+        description: Input file or directory
+        type: file
+        required: true
+        position: 1
+        validation:
+          custom_validator: file_exists
+  behavior:
+    execution_flow:
+      - step: initialization
+        description: Parse command line arguments and validate input
+        actions:
+          - Parse command line arguments
+          - Validate required arguments
+          - Load configuration files
+          - Set up logging and output formatting
+      - step: validation
+        description: Validate input parameters and environment
+        conditions:
+          - All required arguments provided
+        actions:
+          - Validate file/directory paths
+          - Check permissions
+          - Verify dependencies
+          - Validate configuration
+      - step: execution
+        description: Execute main command logic
+        conditions:
+          - Validation passed
+        actions:
+          - Execute main command logic
+          - Handle progress reporting
+          - Process user interactions
+          - Generate output
+      - step: cleanup
+        description: Clean up resources and exit
+        actions:
+          - Clean up temporary files
+          - Close file handles
+          - Report final status
+          - Exit with appropriate code
+    error_handling:
+      - error_type: invalid_argument
+        description: Invalid command line argument provided
+        exit_code: 2
+        message_format: 'Error: Invalid argument "{argument}". {suggestion}'
+        recovery_actions:
+          - Show usage information
+          - Suggest correct format
+      - error_type: file_not_found
+        description: Required file or directory not found
+        exit_code: 1
+        message_format: 'Error: File not found: {path}'
+        recovery_actions:
+          - Check file path
+          - Verify permissions
+      - error_type: permission_denied
+        description: Insufficient permissions to perform operation
+        exit_code: 1
+        message_format: 'Error: Permission denied: {operation}'
+        recovery_actions:
+          - Check file permissions
+          - Run with appropriate privileges
+      - error_type: network_error
+        description: Network operation failed
+        exit_code: 1
+        message_format: 'Error: Network operation failed: {details}'
+        recovery_actions:
+          - Check network connectivity
+          - Retry operation
+          - Check firewall settings
+    user_interaction:
+      - type: progress
+        description: Show operation progress
+        conditions:
+          - Long-running operation
+          - Not in quiet mode
+        format: 'Progress: {percentage}% [{bar}] {current}/{total}'
+  output:
+    formats:
+      - name: text
+        description: Human-readable text output
+        options:
+          - '--format=text'
+        examples:
+          - Operation completed successfully
+      - name: json
+        description: Machine-readable JSON output
+        mime_type: application/json
+        options:
+          - '--format=json'
+          - '--json'
+        examples:
+          - '{"status": "success", "result": {...}}'
+      - name: yaml
+        description: YAML formatted output
+        mime_type: application/yaml
+        options:
+          - '--format=yaml'
+        examples:
+          - |-
+            status: success
+            result: {...}
+    verbosity_levels:
+      - level: quiet
+        description: Only show errors
+        includes:
+          - errors
+      - level: normal
+        description: Show normal output
+        includes:
+          - errors
+          - warnings
+          - info
+      - level: verbose
+        description: Show detailed output
+        includes:
+          - errors
+          - warnings
+          - info
+          - debug
+    exit_codes:
+      - code: 0
+        name: success
+        description: Command completed successfully
+        conditions:
+          - No errors occurred
+      - code: 1
+        name: general_error
+        description: General error occurred
+        conditions:
+          - Runtime error
+          - Operation failed
+      - code: 2
+        name: usage_error
+        description: Invalid command line usage
+        conditions:
+          - Invalid arguments
+          - Missing required parameters
+      - code: 130
+        name: interrupted
+        description: Command was interrupted by user
+        conditions:
+          - SIGINT received
+          - Ctrl+C pressed
+  usability:
+    help_system:
+      formats:
+        - text
+        - man
+        - markdown
+      sections:
+        - usage
+        - description
+        - options
+        - examples
+        - exit_codes
+      auto_generation: true
+      examples_included: true
+    auto_completion:
+      supported_shells:
+        - bash
+        - zsh
+        - fish
+        - powershell
+      completion_types:
+        - commands
+        - options
+        - arguments
+        - files
+      dynamic_completion: true
+    configuration:
+      file_formats:
+        - json
+        - yaml
+        - toml
+      locations:
+        - ~/.config/app
+        - ./config
+        - /etc/app
+      precedence_order:
+        - command_line
+        - environment
+        - config_file
+        - defaults
+      environment_override: true
+  compatibility:
+    platforms:
+      - linux
+      - macos
+      - windows
+    shell_integration:
+      - shell: bash
+        features:
+          - completion
+          - aliases
+        installation_method: source completion script
+      - shell: zsh
+        features:
+          - completion
+          - aliases
+          - functions
+        installation_method: add to .zshrc
+      - shell: fish
+        features:
+          - completion
+          - abbreviations
+        installation_method: install completion file
+    environment_variables:
+      - name: INGEST_CONFIG
+        description: Path to configuration file
+        type: string
+        default: ~/.config/ingest/config.yaml
+      - name: INGEST_LOG_LEVEL
+        description: Logging level
+        type: string
+        default: info
+      - name: INGEST_NO_COLOR
+        description: Disable colored output
+        type: boolean
+        default: 'false'
+complianceRules:
+  - Command must have clear, descriptive help text
+  - All options must have both short and long forms where appropriate
+  - Exit codes must follow standard conventions (0 = success)
+  - Error messages must be clear and actionable
+  - Command must handle --help and --version options
+  - Input validation must provide helpful error messages
+  - Output format must be consistent and parseable
+  - Configuration precedence must be clearly documented
+  - Auto-completion should be available for major shells
+  - Command must be interruptible (handle SIGINT gracefully)
